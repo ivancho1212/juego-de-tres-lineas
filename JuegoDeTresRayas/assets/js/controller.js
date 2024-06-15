@@ -4,36 +4,63 @@ import TicTacToeView from './view.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const loadingElement = document.getElementById('loading');
     const gameElement = document.getElementById('game');
+    const newGameButton = document.getElementById('new-game-button');
+    const modalCancelButton = document.getElementById('modal-cancel-button');
+    const modalNewGameButton = document.getElementById('modal-new-game-button'); // Añadido
     let playerSymbol;
+    let model;
+    let view;
 
-    try {
-        const gameId = prompt("Ingrese el ID del juego:");
+    function showModal(message, showNewGameButton = false) {
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.textContent = message;
+        const modalOkButton = document.getElementById('modal-ok-button'); // Añadido
+        const modalCancelButton = document.getElementById('modal-cancel-button'); // Añadido
+        modalOkButton.style.display = 'none'; // Ocultar botón OK
+        modalCancelButton.style.display = 'none'; // Ocultar botón Cancelar
+        modalNewGameButton.style.display = showNewGameButton ? 'inline-block' : 'none';
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('modal');
+        modal.style.display = 'none';
+    }
+
+    document.querySelector('.close-button').addEventListener('click', closeModal);
+    document.getElementById('modal-ok-button').addEventListener('click', closeModal);
+    modalCancelButton.addEventListener('click', closeModal);
+    modalNewGameButton.addEventListener('click', async () => {
+        closeModal();
+        showIdModal(); // Mostrar modal para ingresar ID del juego al iniciar nueva partida
+    });
+    
+    // Función para inicializar el juego
+    async function initializeGame(gameId) {
         loadingElement.style.display = 'flex';
         gameElement.style.display = 'none';
 
-        // Obtener el estado actual del juego desde la base de datos
-        const model = new TicTacToeModel(gameId);
+        model = new TicTacToeModel(gameId);
         const existingGameData = await model.getGameData();
 
         if (existingGameData) {
-            // Si el primer jugador ya ha elegido un símbolo
             if (existingGameData.player1 && !existingGameData.player2) {
                 playerSymbol = existingGameData.player1 === 'X' ? 'O' : 'X';
                 await model.setPlayerSymbol(playerSymbol, 'player2');
-                alert(`Tú eres el jugador ${playerSymbol}`);
+                showModal(`Tú eres el jugador ${playerSymbol}`);
             } else if (existingGameData.player1 && existingGameData.player2) {
-                alert("Este juego ya ha comenzado y tiene dos jugadores.");
+                showModal("Este juego ya ha comenzado y tiene dos jugadores.");
                 loadingElement.style.display = 'none';
                 return;
             }
         } else {
-            // Si no hay datos de juego, asignar "X" al primer jugador
             playerSymbol = 'X';
             await model.setPlayerSymbol(playerSymbol, 'player1');
-            alert(`Tú eres el jugador ${playerSymbol}`);
+            showModal(`Tú eres el jugador ${playerSymbol}`);
         }
 
-        const view = new TicTacToeView();
+        view = new TicTacToeView();
         loadingElement.style.display = 'none';
         gameElement.style.display = 'block';
 
@@ -45,17 +72,55 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await model.updateBoard(cellIndex, playerSymbol);
                 }
             } else {
-                alert("Es el turno del otro jugador.");
+                showModal("Es el turno del otro jugador.");
             }
         });
 
         model.listenToBoardChanges((data) => {
             view.updateBoard(data);
+            const winner = model.checkWinner(data);
+            if (winner || model.isBoardFull(data)) {
+                if (winner) {
+                    showModal(`¡${winner} ha ganado!`, true);
+                } else {
+                    showModal("¡Es un empate!", true);
+                }
+            }
         });
+    
 
-    } catch (error) {
-        console.error('Error:', error);
-        loadingElement.style.display = 'none';
-        gameElement.style.display = 'none';
+        newGameButton.style.display = 'none'; // Ocultar el botón de nueva partida al iniciar una nueva partida
     }
+
+    // Mostrar modal para ingresar el ID del juego
+    function showIdModal() {
+        const idModal = document.getElementById('id-modal');
+        idModal.style.display = 'block';
+    }
+
+    // Cerrar modal de ingresar ID del juego
+    function closeIdModal() {
+        const idModal = document.getElementById('id-modal');
+        idModal.style.display = 'none';
+    }
+
+    document.querySelector('.close-button').addEventListener('click', closeIdModal);
+    document.getElementById('id-modal-ok-button').addEventListener('click', async () => {
+        const gameIdInput = document.getElementById('game-id-input');
+        const gameId = gameIdInput.value;
+        if (gameId) {
+            closeIdModal();
+            await initializeGame(gameId);
+        }
+    });
+    
+    window.addEventListener('click', (event) => {
+        const idModal = document.getElementById('id-modal');
+        if (event.target === idModal) {
+            closeIdModal();
+        }
+    });
+
+    // Mostrar modal para ingresar ID del juego al cargar la página
+    showIdModal();
 });

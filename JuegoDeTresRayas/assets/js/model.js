@@ -1,10 +1,17 @@
 import { db } from './firebase.js';
-import { doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 class TicTacToeModel {
     constructor(gameId) {
         this.gameId = gameId;
         this.currentPlayer = 'X';
+    }
+
+    showModal(message) {
+        const modal = document.getElementById('modal');
+        const modalMessage = document.getElementById('modal-message');
+        modalMessage.textContent = message;
+        modal.style.display = 'block';
     }
 
     async updateBoard(cellIndex, player) {
@@ -16,13 +23,14 @@ class TicTacToeModel {
             currentPlayer: this.switchPlayer(player)
         }, { merge: true });
 
-        // Check for a winner or a full board after updating
         const updatedGameData = await this.getGameData();
         const winner = this.checkWinner(updatedGameData);
         if (winner) {
-            alert(`¡${winner} ha ganado!`);
+            this.showModal(`¡${winner} ha ganado!`);
+            document.getElementById('new-game-button').style.display = 'block'; // Mostrar el botón al ganar
         } else if (this.isBoardFull(updatedGameData)) {
-            alert("¡Es un empate!");
+            this.showModal("¡Es un empate!");
+            document.getElementById('new-game-button').style.display = 'block'; // Mostrar el botón en empate
         }
     }
 
