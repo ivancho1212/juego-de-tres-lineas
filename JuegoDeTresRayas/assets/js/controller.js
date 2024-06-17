@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gameElement = document.getElementById('game');
     const modalCancelButton = document.getElementById('modal-cancel-button');
     const modalNewGameButton = document.getElementById('modal-new-game-button');
+    const idModalOkButton = document.getElementById('id-modal-ok-button');
     let playerSymbol;
     let model;
     let view;
@@ -13,9 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showModal(message, showNewGameButton = false) {
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
-        modalMessage.textContent = message;
+        modalMessage.innerHTML = message; // Use innerHTML to support HTML content
         const modalOkButton = document.getElementById('modal-ok-button');
-        const modalCancelButton = document.getElementById('modal-cancel-button');
         modalOkButton.style.display = 'none';
         modalCancelButton.style.display = 'none';
         modalNewGameButton.style.display = showNewGameButton ? 'inline-block' : 'none';
@@ -39,12 +39,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function showWinMessage(winner) {
         setTimeout(() => {
-            showModal(`¡${winner} ha ganado!`, true);
-        }, 1500); // Espera 1.5 segundos para mostrar el ganador
+            const winnerColor = winner === 'X' ? 'red' : 'blue';
+            showModal(`¡<span style="color: ${winnerColor};">${winner}</span> ha ganado!`, true);
+        }, 1500); // Espera 1.5 segundos para mostrar el mensaje del ganador
     }
 
     function showTieMessage() {
-        showModal("¡Es un empate!", true);
+        setTimeout(() => {
+            showModal("¡Es un empate!", true);
+        }, 1500); // Espera 1.5 segundos para mostrar el mensaje del empate
     }
 
     function checkWin(cells) {
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 winner = cells[a].textContent;
                 const line = document.createElement('div');
                 line.classList.add('winning-line');
-                line.style.backgroundColor = winner === 'X' ? 'red' : 'blue';
+                line.style.backgroundColor = winner === 'X' ? 'red' : 'blue'; // Color según el ganador
                 document.getElementById('board').appendChild(line);
                 positionLine(line, pattern);
             }
@@ -111,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (existingGameData.player1 && !existingGameData.player2) {
                 playerSymbol = existingGameData.player1 === 'X' ? 'O' : 'X';
                 await model.setPlayerSymbol(playerSymbol, 'player2');
-                showModal(`Tú eres el jugador ${playerSymbol}`);
+                showModal(`Tú eres el jugador <span style="color: ${playerSymbol === 'X' ? 'red' : 'blue'};">${playerSymbol}</span>`);
             } else if (existingGameData.player1 && existingGameData.player2) {
                 showModal("Este juego ya ha comenzado y tiene dos jugadores.");
                 loadingElement.style.display = 'none';
@@ -120,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             playerSymbol = 'X';
             await model.setPlayerSymbol(playerSymbol, 'player1');
-            showModal(`Tú eres el jugador ${playerSymbol}`);
+            showModal(`Tú eres el jugador <span style="color: red;">${playerSymbol}</span>`);
         }
 
         view = new TicTacToeView();
@@ -169,11 +172,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showIdModal() {
         const idModal = document.getElementById('id-modal');
         idModal.style.display = 'block';
+        const gameIdInput = document.getElementById('game-id-input');
+        gameIdInput.value = ''; // Limpiar el campo de entrada del ID
     }
 
-    document.getElementById('id-modal-ok-button').addEventListener('click', async () => {
+    idModalOkButton.addEventListener('click', async () => {
         const gameIdInput = document.getElementById('game-id-input');
         const gameId = gameIdInput.value.trim();
+        gameIdInput.value = ''; // Limpiar el campo de entrada
         if (gameId) {
             const idModal = document.getElementById('id-modal');
             idModal.style.display = 'none';

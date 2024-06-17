@@ -29,7 +29,6 @@ class TicTacToeView {
         this.boardElement.appendChild(lineVertical1);
         this.boardElement.appendChild(lineVertical2);
     }
-   
 
     updateBoard(data) {
         for (const cellIndex in data) {

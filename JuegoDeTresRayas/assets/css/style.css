@@ -132,12 +132,55 @@ h1 {
         transform: rotate(360deg);
     }
 }
-
-#new-game-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1.2em;
+#id-modal-ok-button {
+    font-family: 'Holidays Homework', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 16px; /* Ajusta según sea necesario */
+    background-color: black;
+    color: white;
+    padding: 10px 20px; /* Ajusta el padding según sea necesario */
+    border: none;
     cursor: pointer;
+    border-radius: 5px; /* Añade bordes redondeados si deseas */
+    transition: background-color 0.3s, color 0.3s; /* Transición suave */
+    margin-top: 10px;
+}
+
+#id-modal-ok-button:hover {
+    background-color: white;
+    color: black;
+}
+
+#modal-new-game-button {
+    font-family: 'Holidays Homework', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 16px; /* Ajusta según sea necesario */
+    background-color: black;
+    color: white;
+    padding: 10px 20px; /* Ajusta el padding según sea necesario */
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Añade bordes redondeados si deseas */
+    transition: background-color 0.3s, color 0.3s; /* Transición suave */
+}
+
+#modal-new-game-button:hover {
+    background-color: white;
+    color: black;
+}
+/* Estilo para el campo de entrada del ID */
+#game-id-input {
+    font-family: 'YourCustomFont', sans-serif;
+    font-size: 16px; /* Ajusta según sea necesario */
+    padding: 10px; /* Ajusta el padding según sea necesario */
+    border: 2px solid #ccc; /* Añade un borde gris claro */
+    border-radius: 5px; /* Añade bordes redondeados si deseas */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Transición suave */
+}
+
+/* Cambiar la sombra a roja cuando el campo de entrada está en foco */
+#game-id-input:focus {
+    border-color: rgb(185, 9, 9);
+    box-shadow: 0 0 5px rgb(185, 9, 9);
+    outline: none; /* Eliminar el borde azul por defecto */
 }
 .modal {
     display: none; 
@@ -163,28 +206,28 @@ h1 {
 }
 
 .close-button {
-    color: #aaa;
+    color: black; /* Color por defecto */
     float: right;
-    font-size: 28px;
+    font-size: 24px;
+    cursor: pointer;
     font-weight: bold;
+    transition: color 0.3s; /* Transición suave */
+
 }
 
 .close-button:hover,
 .close-button:focus {
-    color: black;
+    color: rgb(185, 9, 9); /* Cambia a rojo al pasar el cursor */
     text-decoration: none;
     cursor: pointer;
 }
 
-#modal-ok-button, #id-modal-ok-button {
-    margin-top: 15px;
-}
 .cell.x {
-    color: red;
+    color: rgb(185, 9, 9);
 }
 
 .cell.o {
-    color: blue;
+    color: rgb(11, 11, 176);
 }
 
 .winning-line {
