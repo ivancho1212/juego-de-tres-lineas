@@ -12,7 +12,7 @@ class TicTacToeView {
             cell.setAttribute('data-cell-index', i);
             this.boardElement.appendChild(cell);
         }
-
+    
         const lineHorizontal1 = document.createElement('div');
         lineHorizontal1.classList.add('line', 'horizontal');
         const lineHorizontal2 = document.createElement('div');
@@ -23,18 +23,25 @@ class TicTacToeView {
         const lineVertical2 = document.createElement('div');
         lineVertical2.classList.add('line', 'vertical');
         lineVertical2.style.left = 'calc(66.66% - 1.5px)';
-
+    
         this.boardElement.appendChild(lineHorizontal1);
         this.boardElement.appendChild(lineHorizontal2);
         this.boardElement.appendChild(lineVertical1);
         this.boardElement.appendChild(lineVertical2);
     }
+   
 
     updateBoard(data) {
         for (const cellIndex in data) {
             const cell = document.querySelector(`[data-cell-index="${cellIndex}"]`);
             if (cell) {
                 cell.textContent = data[cellIndex];
+                cell.classList.remove('x', 'o');
+                if (data[cellIndex] === 'X') {
+                    cell.classList.add('x');
+                } else if (data[cellIndex] === 'O') {
+                    cell.classList.add('o');
+                }
             }
         }
     }

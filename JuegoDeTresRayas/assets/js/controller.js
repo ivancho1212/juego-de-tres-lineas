@@ -4,9 +4,8 @@ import TicTacToeView from './view.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const loadingElement = document.getElementById('loading');
     const gameElement = document.getElementById('game');
-    const newGameButton = document.getElementById('new-game-button');
     const modalCancelButton = document.getElementById('modal-cancel-button');
-    const modalNewGameButton = document.getElementById('modal-new-game-button'); // Añadido
+    const modalNewGameButton = document.getElementById('modal-new-game-button');
     let playerSymbol;
     let model;
     let view;
@@ -15,10 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const modal = document.getElementById('modal');
         const modalMessage = document.getElementById('modal-message');
         modalMessage.textContent = message;
-        const modalOkButton = document.getElementById('modal-ok-button'); // Añadido
-        const modalCancelButton = document.getElementById('modal-cancel-button'); // Añadido
-        modalOkButton.style.display = 'none'; // Ocultar botón OK
-        modalCancelButton.style.display = 'none'; // Ocultar botón Cancelar
+        const modalOkButton = document.getElementById('modal-ok-button');
+        const modalCancelButton = document.getElementById('modal-cancel-button');
+        modalOkButton.style.display = 'none';
+        modalCancelButton.style.display = 'none';
         modalNewGameButton.style.display = showNewGameButton ? 'inline-block' : 'none';
         modal.style.display = 'block';
     }
@@ -28,15 +27,79 @@ document.addEventListener('DOMContentLoaded', async () => {
         modal.style.display = 'none';
     }
 
-    document.querySelector('.close-button').addEventListener('click', closeModal);
+    document.querySelectorAll('.close-button').forEach(button => {
+        button.addEventListener('click', closeModal);
+    });
     document.getElementById('modal-ok-button').addEventListener('click', closeModal);
     modalCancelButton.addEventListener('click', closeModal);
     modalNewGameButton.addEventListener('click', async () => {
         closeModal();
         showIdModal(); // Mostrar modal para ingresar ID del juego al iniciar nueva partida
     });
-    
-    // Función para inicializar el juego
+
+    function showWinMessage(winner) {
+        setTimeout(() => {
+            showModal(`¡${winner} ha ganado!`, true);
+        }, 1500); // Espera 1.5 segundos para mostrar el ganador
+    }
+
+    function showTieMessage() {
+        showModal("¡Es un empate!", true);
+    }
+
+    function checkWin(cells) {
+        const patterns = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        let winner = null;
+
+        patterns.forEach(pattern => {
+            const [a, b, c] = pattern;
+            if (cells[a].textContent && cells[a].textContent === cells[b].textContent && cells[a].textContent === cells[c].textContent) {
+                winner = cells[a].textContent;
+                const line = document.createElement('div');
+                line.classList.add('winning-line');
+                line.style.backgroundColor = winner === 'X' ? 'red' : 'blue';
+                document.getElementById('board').appendChild(line);
+                positionLine(line, pattern);
+            }
+        });
+
+        return winner;
+    }
+
+    function positionLine(line, pattern) {
+        const cells = document.querySelectorAll('.cell');
+        const startCell = cells[pattern[0]].getBoundingClientRect();
+        const endCell = cells[pattern[2]].getBoundingClientRect();
+        const boardRect = document.getElementById('board').getBoundingClientRect();
+        const topStart = startCell.top - boardRect.top + startCell.height / 2;
+        const leftStart = startCell.left - boardRect.left + startCell.width / 2;
+        const topEnd = endCell.top - boardRect.top + endCell.height / 2;
+        const leftEnd = endCell.left - boardRect.left + endCell.width / 2;
+        const angle = Math.atan2(topEnd - topStart, leftEnd - leftStart) * 180 / Math.PI;
+        const length = Math.hypot(leftEnd - leftStart, topEnd - topStart);
+        line.style.top = `${topStart}px`;
+        line.style.left = `${leftStart}px`;
+        line.style.width = `0`; // Empezar con un ancho de 0 para la animación
+        line.style.transform = `rotate(${angle}deg)`;
+        line.style.transformOrigin = `0 0`; 
+
+        // Animar el ancho de la línea
+        setTimeout(() => {
+            line.style.transition = 'width 1s ease';
+            line.style.width = `${length}px`;
+        }, 50); // Pequeño retardo para asegurarse de que el ancho inicial de 0 se aplica
+    }
+
     async function initializeGame(gameId) {
         loadingElement.style.display = 'flex';
         gameElement.style.display = 'none';
@@ -70,6 +133,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const cellContent = view.getCellContent(cellIndex);
                 if (!cellContent) {
                     await model.updateBoard(cellIndex, playerSymbol);
+                    const cells = document.querySelectorAll('.cell');
+                    const winner = checkWin(cells);
+                    if (winner) {
+                        showWinMessage(winner);
+                    } else if (model.isBoardFull(cells)) {
+                        showTieMessage();
+                    }
                 }
             } else {
                 showModal("Es el turno del otro jugador.");
@@ -78,46 +148,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         model.listenToBoardChanges((data) => {
             view.updateBoard(data);
-            const winner = model.checkWinner(data);
-            if (winner || model.isBoardFull(data)) {
-                if (winner) {
-                    showModal(`¡${winner} ha ganado!`, true);
-                } else {
-                    showModal("¡Es un empate!", true);
-                }
+            const cells = document.querySelectorAll('.cell');
+            const winner = checkWin(cells);
+            if (winner) {
+                showWinMessage(winner);
+            } else if (model.isBoardFull(cells)) {
+                showTieMessage();
             }
         });
-    
-
-        newGameButton.style.display = 'none'; // Ocultar el botón de nueva partida al iniciar una nueva partida
     }
 
-    // Mostrar modal para ingresar el ID del juego
+    // Botón para iniciar una nueva partida al hacer clic en el botón "Iniciar nueva partida" dentro del juego
+    const gameNewGameButton = document.getElementById('new-game-button');
+    if (gameNewGameButton) {
+        gameNewGameButton.addEventListener('click', () => {
+            showIdModal();
+        });
+    }
+
     function showIdModal() {
         const idModal = document.getElementById('id-modal');
         idModal.style.display = 'block';
     }
 
-    // Cerrar modal de ingresar ID del juego
-    function closeIdModal() {
-        const idModal = document.getElementById('id-modal');
-        idModal.style.display = 'none';
-    }
-
-    document.querySelector('.close-button').addEventListener('click', closeIdModal);
     document.getElementById('id-modal-ok-button').addEventListener('click', async () => {
         const gameIdInput = document.getElementById('game-id-input');
-        const gameId = gameIdInput.value;
+        const gameId = gameIdInput.value.trim();
         if (gameId) {
-            closeIdModal();
+            const idModal = document.getElementById('id-modal');
+            idModal.style.display = 'none';
             await initializeGame(gameId);
-        }
-    });
-    
-    window.addEventListener('click', (event) => {
-        const idModal = document.getElementById('id-modal');
-        if (event.target === idModal) {
-            closeIdModal();
+        } else {
+            alert('Por favor, ingrese un ID de juego válido.');
         }
     });
 
