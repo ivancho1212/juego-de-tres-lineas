@@ -4,10 +4,10 @@
   "description": "Juego de tres líneas para dos jugadores.",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "serve -s ."
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.21.1"
   },
   "author": "",
   "license": "ISC"
